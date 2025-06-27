@@ -1,0 +1,66 @@
+/* src/components/Sidebar.css */
+.sidebar {
+  width: 220px;
+  background-color: #004080;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  padding: 15px 20px;
+  display: block;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #0059b3;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 40px;
+  font-size: 20px;
+}
+
+.logout-button {
+  background: none;
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.logout-button:hover {
+  background-color: #0059b3;
+}
+
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 1000;
+  }
+
+  .sidebar.mobile-visible {
+    transform: translateX(0);
+  }
+
+  .sidebar.mobile-hidden {
+    transform: translateX(-100%);
+  }
+}
+

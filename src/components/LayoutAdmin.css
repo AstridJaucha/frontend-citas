@@ -1,0 +1,39 @@
+.main {
+  flex: 1;
+  margin-left: 220px;
+  padding: 30px;
+  background-color: #f5f6fa;
+  transition: margin-left 0.3s ease;
+  width: calc(100% - 220px);
+}
+
+.menu-toggle {
+  display: none;
+}
+
+/* Estilos responsivos */
+@media screen and (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    padding: 60px 20px 20px;
+    width: 100%;
+  }
+
+  .main.full-width {
+    margin-left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background-color: transparent;
+    border: none;
+    font-size: 28px;
+    color: white; /* para que combine con el fondo azul */
+    padding: 8px;
+    cursor: pointer;
+  }
+}
