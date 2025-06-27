@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import RegistrarCita from './RegistrarCita';
+import CitasTabla from './CitasTabla';
 import './LayoutAdmin.css';
 
 const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
@@ -22,15 +23,9 @@ const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
   };
 
   const renderVista = () => {
-    if (vista === 'inicio') {
-      return <section><h2>Bienvenido, {usuario.username}</h2></section>;
-    }
-    if (vista === 'registrar') {
-      return <RegistrarCita />;
-    }
-    if (vista === 'resumen') {
-      return <section><h2>Resumen (Próximamente)</h2></section>;
-    }
+    if (vista === 'inicio') return <h2>Bienvenido, {usuario.username}</h2>;
+    if (vista === 'registrar') return <RegistrarCita />;
+    if (vista === 'resumen') return <CitasTabla />;
     return null;
   };
 
