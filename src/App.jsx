@@ -12,6 +12,7 @@ function App() {
 
   const handleLogout = () => {
     setUsuario(null);
+    localStorage.removeItem('usuario');
   };
 
   if (!usuario) {
