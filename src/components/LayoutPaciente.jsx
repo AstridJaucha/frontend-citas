@@ -43,17 +43,57 @@ const LayoutPaciente = ({ vista, setVista, usuario, onLogout }) => {
 
   const renderVista = () => {
     if (vista === 'inicio') {
-      return (
-        <section>
-          <h2>Recomendaciones para tu cita</h2>
-          <ul>
-            <li>Llega 15 minutos antes de tu cita.</li>
-            <li>Lleva tu DNI.</li>
-            <li>Si no puedes asistir, comunícate con anticipación.</li>
-          </ul>
-        </section>
-      );
-    }
+  const citasProximas = citas.filter(cita =>
+    new Date(`${cita.fechaCita}T${cita.horaCita}`) > new Date()
+  ).slice(0, 3); // máximo 3
+
+  return (
+    <section>
+      <h2>Bienvenido, {usuario.username}</h2>
+
+      <div style={{ margin: '20px 0' }}>
+        <h3>Recomendaciones</h3>
+        <ul>
+          <li>Llega 15 minutos antes de tu cita.</li>
+          <li>Lleva tu DNI o documento de identidad.</li>
+          <li>No olvides tus recetas o informes médicos si tienes.</li>
+        </ul>
+      </div>
+
+      <div style={{ marginBottom: '20px' }}>
+        <h3>Campañas de Salud</h3>
+        <ul>
+          <li>🩺 Vacunación gratuita contra la influenza hasta el 15 de julio.</li>
+          <li>👁️ Campaña de despistaje de glaucoma - todos los viernes.</li>
+        </ul>
+      </div>
+
+      {citasProximas.length > 0 && (
+        <div>
+          <h3>Tus próximas citas</h3>
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            {citasProximas.map((cita) => (
+              <div key={cita.id} style={{
+                background: '#fff',
+                borderRadius: '8px',
+                padding: '15px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                maxWidth: '300px',
+                width: '100%',
+              }}>
+                <h4>{cita.especialidad}</h4>
+                <p><strong>Fecha:</strong> {cita.fechaCita}</p>
+                <p><strong>Hora:</strong> {cita.horaCita}</p>
+                <p><strong>Médico:</strong> {cita.medico}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 
     if (vista === 'citas') {
       return (

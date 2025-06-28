@@ -3,6 +3,8 @@ import Sidebar from './Sidebar';
 import './LayoutAdmin.css';
 import CitasTabla from './CitasTabla';
 import RegistrarCita from './RegistrarCita';
+import InicioAdmin from './InicioAdmin';
+import ResumenAdmin from './ResumenAdmin';
 
 const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -23,9 +25,9 @@ const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
   };
 
   const renderVista = () => {
-    if (vista === 'inicio') return <section><h2>Bienvenido, {usuario.username}</h2></section>;
+    if (vista === 'inicio') return <InicioAdmin />;
     if (vista === 'registrar') return <RegistrarCita />;
-    if (vista === 'resumen') return <CitasTabla />;
+    if (vista === 'resumen')  return <ResumenAdmin />;
     return null;
   };
 

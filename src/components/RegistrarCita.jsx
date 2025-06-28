@@ -3,6 +3,7 @@ import axios from 'axios';
 import { buscarPorDni } from '../services/pacienteService';
 import { listarEspecialidades } from '../services/especialidadService';
 import { listarPorEspecialidad } from '../services/doctorService';
+import './RegistrarCita.css';
 
 const RegistrarCita = () => {
   const [dni, setDni] = useState('');
@@ -10,6 +11,7 @@ const RegistrarCita = () => {
   const [especialidades, setEspecialidades] = useState([]);
   const [doctores, setDoctores] = useState([]);
   const [fechaValida, setFechaValida] = useState(true);
+
   const [formData, setFormData] = useState({
     especialidad: '',
     medico: '',
@@ -29,15 +31,9 @@ const RegistrarCita = () => {
   const horasDisponibles = generarHoras();
 
   useEffect(() => {
-    const cargarEspecialidades = async () => {
-      try {
-        const data = await listarEspecialidades();
-        setEspecialidades(data);
-      } catch (error) {
-        console.error('Error al cargar especialidades:', error);
-      }
-    };
-    cargarEspecialidades();
+    listarEspecialidades()
+      .then(data => setEspecialidades(data))
+      .catch(err => console.error('Error al cargar especialidades', err));
   }, []);
 
   const handleEspecialidadChange = async (e) => {
@@ -63,14 +59,26 @@ const RegistrarCita = () => {
   };
 
   const buscarPaciente = async () => {
+    if (dni.length < 8) {
+      alert("⚠️ El DNI debe tener al menos 8 dígitos.");
+      return;
+    }
+
     try {
       const encontrado = await buscarPorDni(dni);
       setPaciente(encontrado);
     } catch (error) {
       if (error.response?.status === 404) {
         try {
+          // 1. Buscar en RENIEC (simulado aquí como parte de la creación en backend)
           const res = await axios.post('http://localhost:8080/api/pacientes', {
-            dni, nombres: '', apellidos: '', genero: '', fechaNacimiento: '2000-01-01'
+            dni,
+            nombres: '',
+            apellidos: '',
+            genero: '',
+            fechaNacimiento: '2000-01-01',
+            username: dni,
+            password: dni
           });
           setPaciente(res.data);
         } catch (e) {
@@ -88,8 +96,13 @@ const RegistrarCita = () => {
   };
 
   const registrar = async () => {
+    if (!paciente) {
+      alert("⚠️ Debes buscar primero un paciente.");
+      return;
+    }
+
     if (!fechaValida) {
-      alert('La fecha debe ser posterior a hoy.');
+      alert('⚠️ La fecha debe ser posterior a hoy.');
       return;
     }
 
@@ -102,6 +115,7 @@ const RegistrarCita = () => {
         horaCita: formData.horaCita
       });
       alert('✅ Cita registrada con éxito');
+      reiniciarFormulario();
     } catch (error) {
       console.error(error);
       alert('❌ Error al registrar la cita');
@@ -123,56 +137,110 @@ const RegistrarCita = () => {
 
   return (
     <div className="form-container">
-      <h2>Registrar Nueva Cita</h2>
+      <h3>Registrar Nueva Cita</h3>
 
-      <div>
-        <label>DNI del Paciente:</label>
-        <input type="text" value={dni} onChange={e => setDni(e.target.value)} />
-        <button onClick={buscarPaciente}>Buscar en RENIEC</button>
+      <div className="form-section">
+        <h4>Datos del Paciente</h4>
+        <div className="form-group">
+          <label>DNI del Paciente</label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input
+              type="text"
+              value={dni}
+              onChange={e => setDni(e.target.value)}
+              placeholder="Ej. 12345678"
+            />
+            <button onClick={buscarPaciente}>Buscar en RENIEC</button>
+          </div>
+        </div>
+
+        {paciente && (
+          <>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Nombres</label>
+                <input type="text" value={paciente.nombres} disabled />
+              </div>
+              <div className="form-group">
+                <label>Apellidos</label>
+                <input type="text" value={paciente.apellidos} disabled />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Fecha de Nacimiento</label>
+                <input type="text" value={paciente.fechaNacimiento} disabled />
+              </div>
+              <div className="form-group">
+                <label>Género</label>
+                <input type="text" value={paciente.genero || ''} disabled />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {paciente && (
-        <>
-          <h3>Datos del Paciente</h3>
-          <p><strong>DNI:</strong> {paciente.dni}</p>
-          <p><strong>Nombres:</strong> {paciente.nombres}</p>
-          <p><strong>Apellidos:</strong> {paciente.apellidos}</p>
-          <p><strong>Fecha de Nacimiento:</strong> {paciente.fechaNacimiento}</p>
-          <p><strong>Género:</strong> {paciente.genero}</p>
+        <div className="form-section">
+          <h4>Datos de la Cita</h4>
 
-          <h3>Datos de la Cita</h3>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Especialidad</label>
+              <select value={formData.especialidad} onChange={handleEspecialidadChange}>
+                <option value="">Seleccione especialidad</option>
+                {especialidades.map((esp) => (
+                  <option key={esp.id} value={esp.nombre}>{esp.nombre}</option>
+                ))}
+              </select>
+            </div>
 
-          <label>Especialidad:</label>
-          <select value={formData.especialidad} onChange={handleEspecialidadChange}>
-            <option value="">Seleccione una especialidad</option>
-            {especialidades.map((esp) => (
-              <option key={esp.id} value={esp.nombre}>{esp.nombre}</option>
-            ))}
-          </select>
+            <div className="form-group">
+              <label>Médico</label>
+              <select
+                value={formData.medico}
+                onChange={e => setFormData({ ...formData, medico: e.target.value })}
+              >
+                <option value="">Seleccione médico</option>
+                {doctores.map((doc) => (
+                  <option key={doc.id} value={doc.nombre}>{doc.nombre}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-          <label>Médico:</label>
-          <select value={formData.medico} onChange={e => setFormData({ ...formData, medico: e.target.value })}>
-            <option value="">Seleccione un médico</option>
-            {doctores.map((doc) => (
-              <option key={doc.id} value={doc.nombre}>{doc.nombre}</option>
-            ))}
-          </select>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Fecha</label>
+              <input type="date" value={formData.fechaCita} onChange={handleFechaChange} />
+              {!fechaValida && <p style={{ color: 'red' }}>⚠️ Fecha no válida.</p>}
+            </div>
 
-          <label>Fecha:</label>
-          <input type="date" value={formData.fechaCita} onChange={handleFechaChange} />
-          {!fechaValida && <p style={{ color: 'red' }}>⚠️ La fecha debe ser posterior a hoy.</p>}
+            <div className="form-group">
+              <label>Hora</label>
+              <select
+                value={formData.horaCita}
+                onChange={e => setFormData({ ...formData, horaCita: e.target.value })}
+              >
+                <option value="">Seleccione hora</option>
+                {horasDisponibles.map((hora, i) => (
+                  <option key={i} value={hora}>{hora}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-          <label>Hora:</label>
-          <select value={formData.horaCita} onChange={e => setFormData({ ...formData, horaCita: e.target.value })}>
-            <option value="">Seleccione una hora</option>
-            {horasDisponibles.map((hora, i) => (
-              <option key={i} value={hora}>{hora}</option>
-            ))}
-          </select>
-
-          <button onClick={registrar}>Registrar Cita</button>
-          <button onClick={reiniciarFormulario} style={{ marginLeft: '10px', backgroundColor: 'gray' }}>Nueva Cita</button>
-        </>
+          <div className="form-group" style={{ marginTop: '20px' }}>
+            <button onClick={registrar}>Registrar Cita</button>
+            <button
+              onClick={reiniciarFormulario}
+              style={{ marginLeft: '10px', backgroundColor: 'gray' }}
+            >
+              Nueva Cita
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
