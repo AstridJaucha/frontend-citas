@@ -1,5 +1,7 @@
+/* RegistrarCita.css */
+
 .form-container {
-  max-width: 850px;
+  max-width: 800px;
   margin: auto;
   background: white;
   padding: 25px;
@@ -9,10 +11,22 @@
 
 .form-container h3 {
   margin-bottom: 20px;
+  font-size: 24px;
+  color: #004080;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
 }
 
 .form-section {
   margin-bottom: 30px;
+}
+
+.form-section h4 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #007bff;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
 }
 
 .form-group {
@@ -24,6 +38,7 @@
 .form-group label {
   font-size: 14px;
   margin-bottom: 5px;
+  font-weight: 500;
 }
 
 .form-group input,
@@ -32,20 +47,6 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 15px;
-}
-
-.form-group button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.form-group button:hover {
-  background-color: #0056b3;
 }
 
 .form-row {
@@ -59,8 +60,67 @@
   min-width: 200px;
 }
 
-.error {
-  color: red;
-  font-size: 14px;
+.form-group-inline {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.form-group-inline input {
+  flex: 1;
+}
+
+.form-group button {
+  padding: 10px;
+  font-size: 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.form-group button:hover {
+  background-color: #0056b3;
+}
+
+.cancel-btn {
+  background-color: #6c757d !important;
+  margin-left: 10px;
+}
+
+.cancel-btn:hover {
+  background-color: #495057 !important;
+}
+
+.spinner {
   margin-top: 5px;
+  font-size: 14px;
+  color: #007bff;
+  font-weight: 500;
+}
+
+.error {
+  margin-top: 5px;
+  color: red;
+  font-size: 13px;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-group-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-group button,
+  .cancel-btn {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
 }

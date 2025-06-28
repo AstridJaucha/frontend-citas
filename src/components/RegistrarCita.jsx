@@ -7,17 +7,31 @@ import './RegistrarCita.css';
 
 const RegistrarCita = () => {
   const [dni, setDni] = useState('');
+  const [dniValido, setDniValido] = useState(true);
   const [paciente, setPaciente] = useState(null);
+  const [cargando, setCargando] = useState(false);
+
   const [especialidades, setEspecialidades] = useState([]);
   const [doctores, setDoctores] = useState([]);
   const [fechaValida, setFechaValida] = useState(true);
-
   const [formData, setFormData] = useState({
     especialidad: '',
     medico: '',
     fechaCita: '',
     horaCita: ''
   });
+
+  useEffect(() => {
+    const cargarEspecialidades = async () => {
+      try {
+        const data = await listarEspecialidades();
+        setEspecialidades(data);
+      } catch (error) {
+        console.error('Error al cargar especialidades:', error);
+      }
+    };
+    cargarEspecialidades();
+  }, []);
 
   const generarHoras = () => {
     const horas = [];
@@ -29,12 +43,6 @@ const RegistrarCita = () => {
     return horas;
   };
   const horasDisponibles = generarHoras();
-
-  useEffect(() => {
-    listarEspecialidades()
-      .then(data => setEspecialidades(data))
-      .catch(err => console.error('Error al cargar especialidades', err));
-  }, []);
 
   const handleEspecialidadChange = async (e) => {
     const value = e.target.value;
@@ -60,9 +68,11 @@ const RegistrarCita = () => {
 
   const buscarPaciente = async () => {
     if (dni.length < 8) {
-      alert("⚠️ El DNI debe tener al menos 8 dígitos.");
+      setDniValido(false);
       return;
     }
+    setDniValido(true);
+    setCargando(true);
 
     try {
       const encontrado = await buscarPorDni(dni);
@@ -70,7 +80,6 @@ const RegistrarCita = () => {
     } catch (error) {
       if (error.response?.status === 404) {
         try {
-          // 1. Buscar en RENIEC (simulado aquí como parte de la creación en backend)
           const res = await axios.post('http://localhost:8080/api/pacientes', {
             dni,
             nombres: '',
@@ -92,15 +101,12 @@ const RegistrarCita = () => {
           "Error desconocido";
         alert("Error: " + mensaje);
       }
+    } finally {
+      setCargando(false);
     }
   };
 
   const registrar = async () => {
-    if (!paciente) {
-      alert("⚠️ Debes buscar primero un paciente.");
-      return;
-    }
-
     if (!fechaValida) {
       alert('⚠️ La fecha debe ser posterior a hoy.');
       return;
@@ -115,7 +121,6 @@ const RegistrarCita = () => {
         horaCita: formData.horaCita
       });
       alert('✅ Cita registrada con éxito');
-      reiniciarFormulario();
     } catch (error) {
       console.error(error);
       alert('❌ Error al registrar la cita');
@@ -133,6 +138,7 @@ const RegistrarCita = () => {
     });
     setFechaValida(true);
     setDoctores([]);
+    setDniValido(true);
   };
 
   return (
@@ -147,11 +153,18 @@ const RegistrarCita = () => {
             <input
               type="text"
               value={dni}
-              onChange={e => setDni(e.target.value)}
+              onChange={e => {
+                setDni(e.target.value);
+                if (e.target.value.length >= 8) {
+                  setDniValido(true);
+                }
+              }}
               placeholder="Ej. 12345678"
             />
-            <button onClick={buscarPaciente}>Buscar en RENIEC</button>
+            <button onClick={buscarPaciente} disabled={cargando}>Buscar en RENIEC</button>
           </div>
+          {!dniValido && <div className="error">⚠️ El DNI debe tener al menos 8 dígitos.</div>}
+          {cargando && <div className="spinner">Buscando paciente...</div>}
         </div>
 
         {paciente && (
@@ -159,22 +172,22 @@ const RegistrarCita = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Nombres</label>
-                <input type="text" value={paciente.nombres} disabled />
+                <input type="text" value={paciente.nombres} readOnly />
               </div>
               <div className="form-group">
                 <label>Apellidos</label>
-                <input type="text" value={paciente.apellidos} disabled />
+                <input type="text" value={paciente.apellidos} readOnly />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>Fecha de Nacimiento</label>
-                <input type="text" value={paciente.fechaNacimiento} disabled />
+                <input type="text" value={paciente.fechaNacimiento} readOnly />
               </div>
               <div className="form-group">
                 <label>Género</label>
-                <input type="text" value={paciente.genero || ''} disabled />
+                <input type="text" value={paciente.genero || ''} readOnly />
               </div>
             </div>
           </>
@@ -184,12 +197,11 @@ const RegistrarCita = () => {
       {paciente && (
         <div className="form-section">
           <h4>Datos de la Cita</h4>
-
           <div className="form-row">
             <div className="form-group">
               <label>Especialidad</label>
               <select value={formData.especialidad} onChange={handleEspecialidadChange}>
-                <option value="">Seleccione especialidad</option>
+                <option value="">Seleccione una especialidad</option>
                 {especialidades.map((esp) => (
                   <option key={esp.id} value={esp.nombre}>{esp.nombre}</option>
                 ))}
@@ -198,11 +210,8 @@ const RegistrarCita = () => {
 
             <div className="form-group">
               <label>Médico</label>
-              <select
-                value={formData.medico}
-                onChange={e => setFormData({ ...formData, medico: e.target.value })}
-              >
-                <option value="">Seleccione médico</option>
+              <select value={formData.medico} onChange={e => setFormData({ ...formData, medico: e.target.value })}>
+                <option value="">Seleccione un médico</option>
                 {doctores.map((doc) => (
                   <option key={doc.id} value={doc.nombre}>{doc.nombre}</option>
                 ))}
@@ -214,16 +223,13 @@ const RegistrarCita = () => {
             <div className="form-group">
               <label>Fecha</label>
               <input type="date" value={formData.fechaCita} onChange={handleFechaChange} />
-              {!fechaValida && <p style={{ color: 'red' }}>⚠️ Fecha no válida.</p>}
+              {!fechaValida && <p className="error">⚠️ La fecha debe ser posterior a hoy.</p>}
             </div>
 
             <div className="form-group">
               <label>Hora</label>
-              <select
-                value={formData.horaCita}
-                onChange={e => setFormData({ ...formData, horaCita: e.target.value })}
-              >
-                <option value="">Seleccione hora</option>
+              <select value={formData.horaCita} onChange={e => setFormData({ ...formData, horaCita: e.target.value })}>
+                <option value="">Seleccione una hora</option>
                 {horasDisponibles.map((hora, i) => (
                   <option key={i} value={hora}>{hora}</option>
                 ))}
@@ -233,10 +239,7 @@ const RegistrarCita = () => {
 
           <div className="form-group" style={{ marginTop: '20px' }}>
             <button onClick={registrar}>Registrar Cita</button>
-            <button
-              onClick={reiniciarFormulario}
-              style={{ marginLeft: '10px', backgroundColor: 'gray' }}
-            >
+            <button onClick={reiniciarFormulario} style={{ marginLeft: '10px', backgroundColor: 'gray' }}>
               Nueva Cita
             </button>
           </div>
