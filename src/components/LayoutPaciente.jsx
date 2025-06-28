@@ -34,6 +34,13 @@ const LayoutPaciente = ({ vista, setVista, usuario, onLogout }) => {
     setSidebarVisible(prev => !prev);
   };
 
+  const handleNavigate = (view) => {
+    setVista(view);
+    if (isMobile) {
+      setSidebarVisible(false); // Oculta el sidebar al hacer clic
+    }
+  };
+
   const renderVista = () => {
     if (vista === 'inicio') {
       return (
@@ -84,22 +91,29 @@ const LayoutPaciente = ({ vista, setVista, usuario, onLogout }) => {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
-      {isMobile && (
-        <button className="menu-toggle" onClick={toggleSidebar}>☰</button>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {isMobile && !sidebarVisible && (
+        <button
+          className={`menu-toggle`}
+          onClick={toggleSidebar}
+        >
+          ☰
+        </button>
       )}
 
-      <Sidebar
-        tipo="PACIENTE"
-        vista={vista}
-        setVista={setVista}
-        onLogout={onLogout}
-        isMobileVisible={sidebarVisible}
-      />
+      <div style={{ display: 'flex', flex: 1 }}>
+        <Sidebar
+          tipo="PACIENTE"
+          vista={vista}
+          setVista={handleNavigate}
+          onLogout={onLogout}
+          isMobileVisible={sidebarVisible}
+        />
 
-      <main className={`main ${isMobile && !sidebarVisible ? 'full-width' : ''}`}>
-        {renderVista()}
-      </main>
+        <main className={`main ${isMobile && !sidebarVisible ? 'full-width' : ''}`}>
+          {renderVista()}
+        </main>
+      </div>
     </div>
   );
 };

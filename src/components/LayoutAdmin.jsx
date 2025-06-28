@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
-import RegistrarCita from './RegistrarCita';
-import CitasTabla from './CitasTabla';
 import './LayoutAdmin.css';
+import CitasTabla from './CitasTabla';
+import RegistrarCita from './RegistrarCita';
 
 const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -23,7 +23,7 @@ const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
   };
 
   const renderVista = () => {
-    if (vista === 'inicio') return <h2>Bienvenido, {usuario.username}</h2>;
+    if (vista === 'inicio') return <section><h2>Bienvenido, {usuario.username}</h2></section>;
     if (vista === 'registrar') return <RegistrarCita />;
     if (vista === 'resumen') return <CitasTabla />;
     return null;
@@ -31,17 +31,23 @@ const LayoutAdmin = ({ vista, setVista, usuario, onLogout }) => {
 
   return (
     <div style={{ display: 'flex' }}>
-      {isMobile && (
-        <button className="menu-toggle" onClick={toggleSidebar}>☰</button>
-      )}
       <Sidebar
         tipo="ADMIN"
         vista={vista}
-        setVista={setVista}
+        setVista={(vistaSeleccionada) => {
+          setVista(vistaSeleccionada);
+          if (isMobile) setSidebarVisible(false); // Cerrar en móvil tras click
+        }}
         onLogout={onLogout}
         isMobileVisible={sidebarVisible}
       />
+
       <main className={`main ${isMobile && !sidebarVisible ? 'full-width' : ''}`}>
+        {isMobile && (
+          <button className="menu-toggle" onClick={toggleSidebar}>
+            ☰
+          </button>
+        )}
         {renderVista()}
       </main>
     </div>

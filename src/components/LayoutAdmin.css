@@ -4,36 +4,48 @@
   padding: 30px;
   background-color: #f5f6fa;
   transition: margin-left 0.3s ease;
-  width: calc(100% - 220px);
+  width: 100%;
 }
 
 .menu-toggle {
   display: none;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  margin-bottom: 15px;
+  cursor: pointer;
 }
 
-/* Estilos responsivos */
 @media screen and (max-width: 768px) {
   .main {
     margin-left: 0;
-    padding: 60px 20px 20px;
-    width: 100%;
+    padding: 20px;
+  }
+
+  .menu-toggle {
+    display: block;
+    margin-bottom: 20px;
   }
 
   .main.full-width {
     margin-left: 0;
   }
+}
+/* Botón menú hamburguesa (vista móvil) */
+.menu-toggle {
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  color: #004080;
+  align-self: flex-start;
+  margin: 10px;
+  z-index: 1100;
+}
 
-  .menu-toggle {
-    display: block;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1100;
-    background-color: transparent;
-    border: none;
-    font-size: 28px;
-    color: white; /* para que combine con el fondo azul */
-    padding: 8px;
-    cursor: pointer;
-  }
+.menu-toggle.open {
+  background-color: #004080;
+  color: white;
+  border-radius: 5px;
 }
